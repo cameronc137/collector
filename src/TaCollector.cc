@@ -91,8 +91,65 @@ int TaCollector::Process(){
 #ifdef NOISY
     cout << "-- Reading " << this_dir << *itfl << endl;
 #endif
-    TFile* this_file = TFile::Open(this_dir+"./"+(*itfl));
-    TTree* mini_tree = (TTree*)this_file->Get("mini");
+    TFile* redfile = TFile::Open(this_dir+"./"+(*itfl));
+    vector<TString> *DVNames = (vector<TString>*)redfile->Get("DVNames");
+    vector<TString> *IVNames = (vector<TString>*)redfile->Get("IVNames");
+    Int_t* dv_map = new Int_t[ndv];
+    Int_t* iv_map = new Int_t[niv];
+    Bool_t kFileMatched = kTRUE;
+    for(int idv=0;idv<ndv;idv++){
+      vector<TString>::iterator iter_dv = (*DVNames).begin();
+      Bool_t kMatched = kFALSE;
+      while(iter_dv!=(*DVNames).end()){
+	if(dv_list[idv]==(*iter_dv)){
+	  dv_map[idv]=iter_dv-(*DVNames).begin();
+	  kMatched = kTRUE;
+#ifdef DEBUG
+	  cout << "-- Mapping list index: " 
+	       << idv
+	       << " to redfile list index: "
+	       << dv_map[idv] << endl;
+#endif
+	  break;
+	}
+	iter_dv++;
+      }
+      if(!kMatched){
+	dv_map[idv]=-1;
+	kFileMatched = kFALSE;
+	break;
+      }
+    }
+    for(int iiv=0;iiv<niv;iiv++){
+      vector<TString>::iterator iter_iv = (*IVNames).begin();
+      Bool_t kMatched = kFALSE;
+      while(iter_iv!=(*IVNames).end()){
+	if(iv_list[iiv]==(*iter_iv)){
+	  iv_map[iiv]=iter_iv-(*IVNames).begin();
+#ifdef DEBUG
+	  cout << "-- Mapping list index: " 
+	       << iiv 
+	       << " to redfile list index: "
+	       << iv_map[iiv] << endl;
+#endif
+	  kMatched = kTRUE;
+	  break;
+	}
+	iter_iv++;
+      }
+      if(!kMatched){
+	dv_map[iiv]=-1;
+	kFileMatched = kFALSE;
+	break;
+	}
+    }
+    if(!kFileMatched){
+      cout << "-- Error: DV or IV list doesn't match default list. " << endl;
+      redfile->Close();
+      itfl++;
+      continue;
+	}
+    TTree* mini_tree = (TTree*)redfile->Get("mini");
     if(mini_tree!=NULL){
       for(int idv=0;idv<ndv;idv++){
 	mini_tree->SetBranchAddress(dv_list[idv],&dv_raw_stat[idv]);
@@ -102,12 +159,26 @@ int TaCollector::Process(){
       }
       for(int iiv=0;iiv<niv;iiv++)
 	mini_tree->SetBranchAddress(iv_list[iiv],&iv_stat[iiv]);
+      
+      const Int_t ndv_red = (*DVNames).size();
+      const Int_t niv_red = (*IVNames).size();
+      Double_t coeff[ndv_red][niv_red];
+      Double_t coeff_err[ndv_red][niv_red];
+      mini_tree->SetBranchAddress("coeff",coeff);
+      mini_tree->SetBranchAddress("err_coeff",coeff_err);
+
       mini_tree->SetBranchAddress("minirun",&mini_id);
       mini_tree->SetBranchAddress("run_number",&run_number);
       mini_tree->SetBranchAddress("seg_number",&seg_number);
       Int_t nentries = mini_tree->GetEntries();
       for(int ientry=0;ientry<nentries;ientry++){
 	mini_tree->GetEntry(ientry);
+	for(int idv=0;idv<ndv;idv++){
+	  for(int iiv=0;iiv<niv;iiv++){
+	  slope[idv][iiv] = coeff[dv_map[idv]][iv_map[iiv]];
+	  slope_err[idv][iiv] = coeff_err[dv_map[idv]][iv_map[iiv]];
+	  }
+	}
 	col_tree->Fill();
       }
     }
@@ -117,7 +188,7 @@ int TaCollector::Process(){
 	   << *itfl
 	   << ", so now skip to next one " << endl;
 #endif
-    this_file->Close();
+    redfile->Close();
     itfl++;
   }
     
