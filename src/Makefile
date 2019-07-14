@@ -8,8 +8,8 @@ ROOTLIBS  := $(shell $(ROOTCONFIG) --libs) -lMinuit
 ROOTGLIBS := $(shell $(ROOTCONFIG) --glibs)
 ROOTINC :=$(shell $(ROOTCONFIG) --incdir)
 
-CUSTOMDEFINES = -DNOISY
-CXXFLAGS+= -g $(CUSTOMDEFINES)
+CUSTOMDEFINES = -DNOISY -DDEBUG
+CXXFLAGS+= -g -std=c++11 $(CUSTOMDEFINES)
 MAKEDEPEND =$(CXX)
 INCLUDES = -I$(ROOTINC)
 
@@ -43,7 +43,7 @@ install:all
 	mv collector ../;
 %.d:	%.cc
 	@echo Creating dependencies for $<
-	@$(SHELL) -ec '$(MAKEDEPEND) -MM $(INCLUDES) -c $< \
+	@$(SHELL) -ec '$(MAKEDEPEND) -std=c++11 -MM $(INCLUDES) -c $< \
 	      | sed '\''s%^.*\.o%$*\.o%g'\'' \
 	      | sed '\''s%\($*\)\.o[ :]*%\1.o $@ : %g'\'' > $@; \
 	      [ -s $@ ] || rm -f $@'
