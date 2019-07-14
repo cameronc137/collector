@@ -18,7 +18,8 @@ public:
   
   inline void ToggleSnapshot(Bool_t is){isSnapshotMode=is;};
   inline void SetDirectory(TString dir){target_dir=dir;};
-  inline void SetRunList(TString name){list_name=name;};
+  inline void SetRunList(TString name){list_name=name;}
+  inline void SetRunListDefined(){isRunListDefined=kTRUE;};
   inline Bool_t GetSnapshotMode(){return isSnapshotMode;};
   inline vector<TString> GetNameList(){return nameList;};
   inline TString GetDirectory(){return target_dir;};
@@ -31,7 +32,7 @@ private:
   TString target_dir;
   TString list_name;
   vector<TString> nameList;
-  
+  vector<Int_t> defined_list;
   ClassDef(TaInput,0);
 };
 

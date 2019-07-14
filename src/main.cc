@@ -60,8 +60,10 @@ int main(int argc, char** argv){
   TaInput* fInput = new TaInput();
   if(isDirectoryDefined)
     fInput->SetDirectory(starget_dir);
-  if(isRunListDefined)
+  if(isRunListDefined){
     fInput->SetRunList(slist_name);
+    fInput->SetRunListDefined();
+  }
   fInput->ToggleSnapshot(isSnapshotMode);
   fInput->LoadConfig();
   
