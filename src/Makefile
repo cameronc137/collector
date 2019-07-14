@@ -39,7 +39,8 @@ collector:$(OBJS) Collector_Dict.o main.o
 clean:
 	rm -f *.o;
 	rm -f *Dict*;	
-
+install:all
+	mv collector ../;
 %.d:	%.cc
 	@echo Creating dependencies for $<
 	@$(SHELL) -ec '$(MAKEDEPEND) -MM $(INCLUDES) -c $< \
