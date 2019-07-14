@@ -19,7 +19,8 @@ int main(int argc, char** argv){
   cout<< "\t <tao.ye@stonybrook.edu>" << endl;
   cout<< "\t last update: July 2019" << endl;
   cout << "***********************************************\n " <<endl;
-
+  if(argc==1)
+    return 1;
   int opt;
   TString starget_dir;
   TString slist_name;
