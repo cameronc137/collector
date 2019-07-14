@@ -48,6 +48,11 @@ int TaInput::SearchFiles(){
 	fileList->Remove(sysfile);
 	continue;
       }
+      if(!(name_buff.Contains("regress"))){
+	fileList->Remove(sysfile);
+	continue;
+      }
+
     }// end of fileList Loop;
     TIter iter(fileList);
     fileList->Sort();
