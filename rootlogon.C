@@ -11,13 +11,20 @@ void rootlogon(){
   cout << " ----------------------------------------------" <<endl;
   cout << "Collector Output Reader" << endl;
   cout << "Example : "<< endl;
+  cout << "	\t Step1. Open(\"prexPrompt_20190714Swing.root\") "<< endl;
+  cout << "	\t Step2.  "<< endl;
   cout << "	\t Show(\"reg_asym_usl.rms/ppm\") "<< endl;
   cout << "	\t Show(\"diff_bpm4aX.rms/um\") "<< endl;
   cout << "	\t Show(\"usl_bpm4aX/(ppm/um)\") "<< endl;
   cout << " ----------------------------------------------\n" <<endl;
+  
 
-  TFile* rootfile = TFile::Open("test.root");
-  TTree* run_tree = (TTree*)rootfile->Get("T"); 
+}
+void Open(TString filename){
+  TFile* rootfile = TFile::Open(filename);
+}
+void Show(TString channel_name){
+  TTree* run_tree = (TTree*)gDirectory->Get("T");  
   TString dv_list[]=
     {"asym_usl",
      "asym_usr",
@@ -51,14 +58,9 @@ void rootlogon(){
       iv_name.ReplaceAll("diff_","");
       TString coeff_name = Form("slope[%d][%d]",idv,iiv);
       run_tree->SetAlias(Form("%s_%s",dv_name.Data(),iv_name.Data()),
-			  coeff_name);
+			 coeff_name);
     }
   }
-
-}
-
-void Show(TString channel_name){
-  TTree* run_tree = (TTree*)gDirectory->FindObject("T");  
   TCanvas *c1 = new TCanvas("c1","c1",1200,600);
   c1->SetGridx();
   c1->SetGridy();

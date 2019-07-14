@@ -28,6 +28,7 @@ private:
   //TTree* slug_tree;
   //data
   TaInput* fInput;
+  TString outputName;
   //  TaOutput* fOutput;
 
   ClassDef(TaCollector,0);

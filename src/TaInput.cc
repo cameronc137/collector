@@ -57,7 +57,7 @@ int TaInput::SearchFiles(){
     TIter iter(fileList);
     fileList->Sort();
     while( (sysfile=(TSystemFile*)iter()) ){
-#ifdef NOISY
+#ifdef DEBUG
       cout << "-- Found file " << sysfile->GetName() << endl;
 #endif
       if(isRunListDefined){

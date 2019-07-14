@@ -20,9 +20,11 @@ public:
   inline void SetDirectory(TString dir){target_dir=dir;};
   inline void SetRunList(TString name){list_name=name;}
   inline void SetRunListDefined(){isRunListDefined=kTRUE;};
+  inline Bool_t IsRunListDefined(){return isRunListDefined;};
   inline Bool_t GetSnapshotMode(){return isSnapshotMode;};
   inline vector<TString> GetNameList(){return nameList;};
   inline TString GetDirectory(){return target_dir;};
+  inline TString GetListFileName(){return list_name;};
   //data
 
 private:

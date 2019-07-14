@@ -1,5 +1,7 @@
 #include "TaInput.hh"
 #include "TaCollector.hh"
+#include "TDatime.h"
+#include "TString.h"
 //#include "TaOutput.hh"
 #include <iostream>
 
@@ -32,7 +34,20 @@ TaCollector::TaCollector(){
 }
 TaCollector::TaCollector(TaInput *aInput){
   fInput= aInput;
-  collection_file = new TFile("test.root","RECREATE");
+  TDatime* nowTime = new TDatime();
+  if(fInput->IsRunListDefined()){
+    TString list_filename = fInput->GetListFileName();
+    Ssiz_t last = list_filename.Last('.');
+    TString filename_stem = list_filename(0,last);
+    outputName = Form("prexPrompt_%s.root",
+		      filename_stem.Data());
+  }
+  else
+    outputName = Form("prexPrompt_%d_snapshot.root",
+		      nowTime->GetDate());
+		      
+  collection_file = new TFile(outputName,"RECREATE");
+  
 }
 
 TaCollector::~TaCollector(){
@@ -91,9 +106,24 @@ int TaCollector::Process(){
 #ifdef NOISY
     cout << "-- Reading " << this_dir << *itfl << endl;
 #endif
-    TFile* redfile = TFile::Open(this_dir+"./"+(*itfl));
+    TFile* redfile = TFile::Open(this_dir+"/"+(*itfl));
+    if(redfile==NULL){
+      cout << "-- Warning: failed to open "
+	   << *itfl
+	   << endl;
+      itfl++;
+      continue;
+    }
+
     vector<TString> *DVNames = (vector<TString>*)redfile->Get("DVNames");
     vector<TString> *IVNames = (vector<TString>*)redfile->Get("IVNames");
+    if(DVNames==NULL || IVNames==NULL){
+      cout << "-- Warning: DVNames or IVNames are "
+	   << "not registerd in postpan file "
+	   << endl;
+      itfl++;
+      continue;
+    }
     Int_t* dv_map = new Int_t[ndv];
     Int_t* iv_map = new Int_t[niv];
     Bool_t kFileMatched = kTRUE;
@@ -116,6 +146,9 @@ int TaCollector::Process(){
       }
       if(!kMatched){
 	dv_map[idv]=-1;
+#ifdef NOISY
+	cout << "-- kFileMatched faile " <<endl;
+#endif
 	kFileMatched = kFALSE;
 	break;
       }
@@ -139,6 +172,9 @@ int TaCollector::Process(){
       }
       if(!kMatched){
 	dv_map[iiv]=-1;
+#ifdef NOISY
+	cout << "-- kFileMatched failed " <<endl;
+#endif
 	kFileMatched = kFALSE;
 	break;
 	}
