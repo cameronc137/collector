@@ -44,6 +44,7 @@ int TaCollector::Process(){
        << __PRETTY_FUNCTION__ << endl;
 #endif
   col_tree = new TTree("T","Collection Tree");
+  col_tree->SetMarkerStyle(20);
   Int_t run_number,seg_number,mini_id;
   typedef struct {Double_t ppm,um;} UNIT;
   UNIT parity_scale;
@@ -102,7 +103,8 @@ int TaCollector::Process(){
       for(int iiv=0;iiv<niv;iiv++)
 	mini_tree->SetBranchAddress(iv_list[iiv],&iv_stat[iiv]);
       mini_tree->SetBranchAddress("minirun",&mini_id);
-      
+      mini_tree->SetBranchAddress("run_number",&run_number);
+      mini_tree->SetBranchAddress("seg_number",&seg_number);
       Int_t nentries = mini_tree->GetEntries();
       for(int ientry=0;ientry<nentries;ientry++){
 	mini_tree->GetEntry(ientry);
