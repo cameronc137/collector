@@ -39,11 +39,11 @@ TaCollector::TaCollector(TaInput *aInput){
     TString list_filename = fInput->GetListFileName();
     Ssiz_t last = list_filename.Last('.');
     TString filename_stem = list_filename(0,last);
-    outputName = Form("prexPrompt_%s.root",
+    outputName = Form("rootfiles/prexPrompt_%s.root",
 		      filename_stem.Data());
   }
   else
-    outputName = Form("prexPrompt_%d_snapshot.root",
+    outputName = Form("rootfiles/prexPrompt_%d_snapshot.root",
 		      nowTime->GetDate());
 		      
   collection_file = new TFile(outputName,"RECREATE");
@@ -61,15 +61,17 @@ int TaCollector::Process(){
   col_tree = new TTree("T","Collection Tree");
   col_tree->SetMarkerStyle(20);
   Int_t run_number,seg_number,mini_id;
-  typedef struct {Double_t ppm,um;} UNIT;
+  typedef struct {Double_t ppm,ppb,um,nm;} UNIT;
   UNIT parity_scale;
   parity_scale.ppm = 1e-6;
+  parity_scale.ppb = 1e-9;
   parity_scale.um = 1e-3;
+  parity_scale.nm = 1e-6;
 
   col_tree->Branch("run",&run_number,"run/I");
   col_tree->Branch("seg",&seg_number,"seg/I");
   col_tree->Branch("mini",&mini_id,"mini/I");
-  col_tree->Branch("unit",&parity_scale,"ppm/D:um");
+  col_tree->Branch("unit",&parity_scale,"ppm/D:ppb:um:nm");
   
   typedef struct {Double_t mean,err,rms;} STATS;
   const int ndv = sizeof(dv_list)/sizeof(*dv_list);
