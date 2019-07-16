@@ -1,9 +1,4 @@
-// 	Collector Output Reader
-//	author : Tao Ye	
-//	Last update :  July 2019
-
 //	Collector Output Reader
-// 	- postpan regression output reader macro
 //	author : Tao Ye	
 //	Last update :  July 2019
 
@@ -17,13 +12,14 @@ void rootlogon(){
   cout << "	\t Show(\"diff_bpm4aX.rms/um\") "<< endl;
   cout << "	\t Show(\"usl_bpm4aX/(ppm/um)\") "<< endl;
   cout << " ----------------------------------------------\n" <<endl;
-  
+
+  gStyle->SetOptFit(1);
 
 }
 void Open(TString filename){
   TFile* rootfile = TFile::Open(filename);
 }
-void Show(TString channel_name){
+void Show(TString channel_name, TCut user_cut=""){
   TTree* run_tree = (TTree*)gDirectory->Get("T");  
   TString dv_list[]=
     {"asym_usl",
@@ -64,27 +60,70 @@ void Show(TString channel_name){
   TCanvas *c1 = new TCanvas("c1","c1",1200,600);
   c1->SetGridx();
   c1->SetGridy();
-  Int_t npt = run_tree->Draw("run:Entry$","","goff");
+  Int_t npt = run_tree->Draw("run:Entry$",user_cut,"goff");
   double* dummy = run_tree->GetV1();
   double* run =new double[npt];
   for(int ipt=0;ipt<npt;ipt++)
     run[ipt] = *(dummy+ipt);
 
-  run_tree->Draw("mini:Entry$","","goff");
+  run_tree->Draw("mini:Entry$",user_cut,"goff");
   double* mini = new double[npt];
   dummy = run_tree->GetV1();
   for(int ipt=0;ipt<npt;ipt++)
     mini[ipt] = *(dummy+ipt);
   
-  run_tree->Draw(channel_name+":Entry$");
-  TH2D* h_buff = (TH2D*)gPad->FindObject("htemp");
-  if(h_buff!=NULL){
-    h_buff->GetXaxis()->SetTitle("Run.Mini");
-    for(int ipt=0;ipt<npt;ipt++){
-      h_buff->GetXaxis()->SetBinLabel(ipt+1,
-				      Form("%d.%d",(int)run[ipt],(int)mini[ipt]));
+
+  if(channel_name.Contains("mean")){
+      npt=run_tree->Draw(channel_name+":Entry$",user_cut,"goff");
+      double* mean = new double[npt];
+      double* ent = new double[npt];
+      dummy = run_tree->GetV1();
+      for(int ipt=0;ipt<npt;ipt++)
+	mean[ipt] = *(dummy+ipt);
+
+      for(int ipt=0;ipt<npt;ipt++)
+	ent[ipt] = ipt;
+      
+      TString channel_err = channel_name;
+      channel_err.ReplaceAll("mean","err");
+      npt=run_tree->Draw(channel_err+":Entry$",user_cut,"goff");
+      dummy = run_tree->GetV1();
+      double* err = new double[npt];
+      double* x_err = new double[npt];
+      for(int ipt=0;ipt<npt;ipt++){
+	err[ipt] = *(dummy+ipt);
+	x_err[ipt] = 0.0;
+      }
+
+      TGraphErrors* fGraph = new TGraphErrors(npt,
+					      ent,mean,
+					      x_err,err);
+      fGraph->SetMarkerStyle(20);
+      fGraph->Draw("AP");
+      fGraph->Fit("pol0");
+      fGraph->SetTitle(channel_name);
+      fGraph->GetXaxis()->Set(npt,-0.5,npt-0.5);
+      fGraph->GetXaxis()->SetTitle("Run.Mini");
+      for(int ipt=0;ipt<npt;ipt++){
+	fGraph->GetXaxis()->SetBinLabel(ipt+1,
+					Form("%d.%d",(int)run[ipt],(int)mini[ipt]));
+      }
     }
-  }
-  else
-    cout << channel_name << " Not Found" << endl;
+    else{
+      npt=run_tree->Draw(channel_name+":Entry$",user_cut,"goff");
+      Double_t *ent = new Double_t[npt];
+      for(int ipt=0;ipt<npt;ipt++)
+	ent[ipt] = ipt;
+
+      TGraph* fGraph = new TGraph(npt,ent,run_tree->GetV1());
+      fGraph->SetMarkerStyle(20);
+      fGraph->Draw("AP");
+      fGraph->SetTitle(channel_name);
+      fGraph->GetXaxis()->Set(npt,-0.5,npt-0.5);
+      fGraph->GetXaxis()->SetTitle("Run.Mini");
+      for(int ipt=0;ipt<npt;ipt++){
+	fGraph->GetXaxis()->SetBinLabel(ipt+1,
+					Form("%d.%d",(int)run[ipt],(int)mini[ipt]));
+      }
+    }
 }
