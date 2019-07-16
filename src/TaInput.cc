@@ -44,7 +44,7 @@ int TaInput::SearchFiles(){
 	 fileList->Remove(sysfile);
 	 continue;
       }
-      if(!(name_buff.Contains("prex"))){
+      if(!(name_buff.Contains("prexPrompt"))){
 	fileList->Remove(sysfile);
 	continue;
       }
