@@ -37,8 +37,10 @@ TaCollector::TaCollector(TaInput *aInput){
   TDatime* nowTime = new TDatime();
   if(fInput->IsRunListDefined()){
     TString list_filename = fInput->GetListFileName();
-    Ssiz_t last = list_filename.Last('.');
-    TString filename_stem = list_filename(0,last);
+    Ssiz_t last = list_filename.Last('.')-1;
+    Ssiz_t first = list_filename.Last('/')+1;
+    Ssiz_t length_t = last - first+1;
+    TString filename_stem = list_filename(first,length_t);
     outputName = Form("rootfiles/prexPrompt_%s.root",
 		      filename_stem.Data());
   }
