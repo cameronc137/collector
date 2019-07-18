@@ -18,7 +18,25 @@ TString dv_list[]=
    "asym_left_dd",
    "asym_right_avg",
    "asym_right_dd",
-   "asym_bcm_an_ds3"};
+   "asym_bcm_an_ds3",
+   "bcm_an_us_ds3_dd",
+   "bcm_an_us_ds_dd",
+   "asym_sam1",
+   "asym_sam2",
+   "asym_sam3",
+   "asym_sam4",
+   "asym_sam5",
+   "asym_sam6",
+   "asym_sam7",
+   "asym_sam8",
+   "asym_sam_15_avg",
+   "asym_sam_15_dd",
+   "asym_sam_37_avg",
+   "asym_sam_37_dd",
+   "asym_sam_26_avg",
+   "asym_sam_26_dd",
+   "asym_sam_48_avg",
+   "asym_sam_48_dd"};
 
 TString iv_list[]=
   {"diff_bpm4aX",
@@ -89,7 +107,7 @@ int TaCollector::Process(){
 		     &dv_raw_stat[idv],
 		     "mean/D:err:rms");
     TString name_buff =dv_list[idv];
-    name_buff = name_buff.ReplaceAll("asym","reg_asym");
+    name_buff = "reg_"+name_buff;
     col_tree->Branch(name_buff,
 		     &dv_reg_stat[idv],
 		     "mean/D:err:rms");
@@ -194,7 +212,7 @@ int TaCollector::Process(){
       for(int idv=0;idv<ndv;idv++){
 	mini_tree->SetBranchAddress(dv_list[idv],&dv_raw_stat[idv]);
 	TString reg_name = dv_list[idv];
-	reg_name.ReplaceAll("asym","reg_asym");
+	reg_name = "reg_"+reg_name;
 	mini_tree->SetBranchAddress(reg_name,&dv_reg_stat[idv]);
       }
       for(int iiv=0;iiv<niv;iiv++)
